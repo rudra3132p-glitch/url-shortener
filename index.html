@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnipURL - Premium URL Shortener</title>
+    <meta name="description" content="A premium, lightning-fast URL shortener with custom aliases, QR codes, and analytics." />
+    <meta name="theme-color" content="#0a0a0f" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="SnipURL - Premium URL Shortener" />
+    <meta property="og:description" content="Turn long, ugly links into clean, trackable snips." />
+    <meta property="og:type" content="website" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <!-- Floating Particles Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Navbar -->
+    <header class="navbar" id="navbar">
+      <div class="container nav-container">
+        <a href="#" class="logo">
+          <div class="logo-icon-wrap">
+            <i data-lucide="zap"></i>
+          </div>
+          <span>Snip<em>URL</em></span>
+        </a>
+        <nav class="desktop-nav">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#stats" class="nav-link">Stats</a>
+          <a href="#history" class="nav-link">History</a>
+        </nav>
+        <button class="btn btn-primary nav-cta" onclick="document.getElementById('url-input').focus()">
+          <i data-lucide="sparkles" style="width:16px;height:16px"></i>
+          Get Started
+        </button>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+          <span class="hamburger" id="hamburger">
+            <span></span><span></span><span></span>
+          </span>
+        </button>
+      </div>
+      <!-- Mobile Menu Overlay -->
+      <div class="mobile-nav" id="mobile-nav">
+        <a href="#features" class="mobile-nav-link">Features</a>
+        <a href="#stats" class="mobile-nav-link">Stats</a>
+        <a href="#history" class="mobile-nav-link">History</a>
+        <button class="btn btn-gradient mobile-cta" onclick="document.getElementById('url-input').focus()">Get Started</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero & Shortener Section -->
+      <section class="hero-section">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-grid"></div>
+        <div class="container hero-content">
+          <div class="badge animate-up" style="--delay: 0s">
+            <i data-lucide="sparkles" style="width:14px;height:14px"></i>
+            <span>Trusted by 15,000+ users worldwide</span>
+          </div>
+          <h1 class="hero-title">
+            <span class="animate-up" style="--delay: 0.1s">Shorten.</span>
+            <span class="animate-up" style="--delay: 0.25s">Share.</span>
+            <span class="animate-up gradient-text" style="--delay: 0.4s">Track.</span>
+          </h1>
+          <p class="hero-subtitle animate-fade" style="--delay: 0.6s">
+            The premium URL shortener built for speed, privacy, and seamless sharing.<br>
+            Turn long, ugly links into clean, trackable snips.
+          </p>
+
+          <!-- URL Shortener Form -->
+          <div class="shortener-card animate-scale" style="--delay: 0.7s">
+            <div class="card-glow"></div>
+            <form id="shortener-form" novalidate>
+              <div class="input-group" id="input-group">
+                <i data-lucide="link" class="input-icon"></i>
+                <input type="url" id="url-input" placeholder="Paste your long URL here..." required autocomplete="off" />
+                <button type="submit" class="btn btn-gradient" id="submit-btn">
+                  <span class="btn-text" id="btn-text">
+                    <i data-lucide="scissors" style="width:18px;height:18px"></i>
+                    Shorten
+                  </span>
+                  <div class="spinner hidden" id="loading-spinner"></div>
+                  <div class="success-check hidden" id="success-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><polyline class="check-path" points="4 12 9 17 20 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </button>
+              </div>
+
+              <div class="advanced-toggle" id="advanced-toggle">
+                <i data-lucide="settings" style="width:14px;height:14px"></i>
+                <span>Advanced Options</span>
+                <i data-lucide="chevron-down" class="adv-chevron" id="adv-chevron"></i>
+              </div>
+
+              <div class="advanced-options" id="advanced-options">
+                <div class="custom-alias-group">
+                  <span class="prefix">snip.it/</span>
+                  <input type="text" id="custom-alias" placeholder="custom-alias (optional)" pattern="[a-zA-Z0-9-]+" />
+                </div>
+              </div>
+
+              <div class="error-msg" id="error-msg">
+                <i data-lucide="alert-circle" style="width:14px;height:14px"></i>
+                Please enter a valid URL (e.g. https://example.com)
+              </div>
+            </form>
+          </div>
+
+          <!-- Result Card -->
+          <div class="result-card hidden" id="result-card">
+            <div class="result-border-glow"></div>
+            <div class="result-inner">
+              <div class="result-info">
+                <div class="result-label">Original URL</div>
+                <p class="original-url" id="res-original"></p>
+                <div class="result-label" style="margin-top:12px">Shortened URL</div>
+                <a href="#" class="short-url" id="res-short" target="_blank"></a>
+              </div>
+              <div class="result-divider"></div>
+              <div class="result-actions">
+                <button class="btn btn-action copy-action" id="copy-btn" aria-label="Copy to clipboard">
+                  <i data-lucide="copy" id="copy-icon"></i>
+                  <span id="copy-text">Copy</span>
+                </button>
+                <button class="btn btn-action qr-action" id="qr-btn" aria-label="Generate QR Code">
+                  <i data-lucide="qr-code"></i>
+                  <span>QR Code</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scroll indicator -->
+          <div class="scroll-indicator animate-fade" style="--delay: 1.2s">
+            <div class="mouse">
+              <div class="mouse-wheel"></div>
+            </div>
+            <span>Scroll to explore</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="stats-section" id="stats">
+        <div class="container">
+          <div class="stats-grid">
+            <div class="stat-card observe" style="--stagger: 0">
+              <div class="stat-icon"><i data-lucide="link-2"></i></div>
+              <div class="stat-number" data-target="15042">0</div>
+              <div class="stat-label">Links Shortened</div>
+            </div>
+            <div class="stat-card observe" style="--stagger: 1">
+              <div class="stat-icon"><i data-lucide="mouse-pointer-click"></i></div>
+              <div class="stat-number" data-target="892301">0</div>
+              <div class="stat-label">Clicks Tracked</div>
+            </div>
+            <div class="stat-card observe" style="--stagger: 2">
+              <div class="stat-icon"><i data-lucide="users"></i></div>
+              <div class="stat-number" data-target="4205">0</div>
+              <div class="stat-label">Active Users</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works Section -->
+      <section class="how-section" id="how">
+        <div class="container">
+          <h2 class="section-title text-center observe">How It Works</h2>
+          <p class="section-subtitle text-center observe">Three simple steps to powerful links</p>
+          <div class="steps-grid">
+            <div class="step-card observe" style="--stagger: 0">
+              <div class="step-number">01</div>
+              <div class="step-icon"><i data-lucide="clipboard-paste"></i></div>
+              <h3>Paste Your URL</h3>
+              <p>Drop any long URL into our input field — we handle the rest.</p>
+            </div>
+            <div class="step-connector observe" style="--stagger: 0.5">
+              <div class="connector-line"></div>
+              <i data-lucide="arrow-right"></i>
+            </div>
+            <div class="step-card observe" style="--stagger: 1">
+              <div class="step-number">02</div>
+              <div class="step-icon"><i data-lucide="wand-2"></i></div>
+              <h3>Customize It</h3>
+              <p>Add a custom alias or let us generate a clean, unique short link.</p>
+            </div>
+            <div class="step-connector observe" style="--stagger: 1.5">
+              <div class="connector-line"></div>
+              <i data-lucide="arrow-right"></i>
+            </div>
+            <div class="step-card observe" style="--stagger: 2">
+              <div class="step-number">03</div>
+              <div class="step-icon"><i data-lucide="share-2"></i></div>
+              <h3>Share & Track</h3>
+              <p>Copy, share via QR code, and track every click in real-time.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="features-section" id="features">
+        <div class="container">
+          <h2 class="section-title text-center observe">Why Choose SnipURL?</h2>
+          <p class="section-subtitle text-center observe">Everything you need for professional link management</p>
+          <div class="features-grid">
+            <div class="feature-card observe" style="--stagger: 0">
+              <div class="feature-icon"><i data-lucide="zap"></i></div>
+              <h3>Lightning Fast</h3>
+              <p>Built on modern infrastructure to ensure your links are created and redirected instantly.</p>
+            </div>
+            <div class="feature-card observe" style="--stagger: 1">
+              <div class="feature-icon"><i data-lucide="pen-tool"></i></div>
+              <h3>Custom Aliases</h3>
+              <p>Make your links memorable with custom aliases that reflect your brand identity.</p>
+            </div>
+            <div class="feature-card observe" style="--stagger: 2">
+              <div class="feature-icon"><i data-lucide="bar-chart-3"></i></div>
+              <h3>Rich Analytics</h3>
+              <p>Track clicks, geographic locations, and referrers to understand your audience.</p>
+            </div>
+            <div class="feature-card observe" style="--stagger: 3">
+              <div class="feature-icon"><i data-lucide="shield-check"></i></div>
+              <h3>Secure & Private</h3>
+              <p>Your data is encrypted end-to-end. We never track personal information.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Links History -->
+      <section class="history-section" id="history">
+        <div class="container">
+          <div class="history-header observe">
+            <div>
+              <h2 class="section-title">Recent Snips</h2>
+              <p class="section-subtitle">Your recently shortened links</p>
+            </div>
+            <button class="btn btn-outline btn-sm hidden" id="clear-history">
+              <i data-lucide="trash" style="width:14px;height:14px"></i>
+              Clear All
+            </button>
+          </div>
+
+          <div class="history-container observe">
+            <div class="empty-state" id="empty-state">
+              <div class="empty-icon-wrap">
+                <i data-lucide="inbox"></i>
+              </div>
+              <h3>No links yet</h3>
+              <p>Shorten your first URL above to see it here!</p>
+            </div>
+
+            <div class="history-list hidden" id="history-list">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- QR Code Modal -->
+    <div class="modal-overlay hidden" id="qr-modal">
+      <div class="modal-card">
+        <button class="modal-close" id="qr-modal-close" aria-label="Close">
+          <i data-lucide="x"></i>
+        </button>
+        <h3>QR Code</h3>
+        <p class="modal-subtitle">Scan to visit your short URL</p>
+        <div class="qr-display" id="qr-display"></div>
+        <p class="qr-url" id="qr-url"></p>
+        <button class="btn btn-gradient btn-full" id="qr-download">
+          <i data-lucide="download" style="width:16px;height:16px"></i>
+          Download QR
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <div class="logo-icon-wrap">
+              <i data-lucide="zap"></i>
+            </div>
+            <span>Snip<em>URL</em></span>
+          </a>
+          <p>The premium URL shortener for the modern web. Fast, secure, and beautiful.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Product</h4>
+          <a href="#">Features</a>
+          <a href="#">Pricing</a>
+          <a href="#">API</a>
+          <a href="#">Changelog</a>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <a href="#">About</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+        </div>
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Cookie Policy</a>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <p>&copy; 2026 SnipURL. Crafted with care.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Twitter"><i data-lucide="twitter"></i></a>
+          <a href="#" aria-label="GitHub"><i data-lucide="github"></i></a>
+          <a href="#" aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="./main.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
